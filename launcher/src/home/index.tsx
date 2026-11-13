@@ -6,6 +6,7 @@ import type { StatusStores } from "../contracts/status";
 import type { LauncherUpdateNotice } from "../contracts/updates";
 import type { LauncherRuntime } from "../platform/tizen/launcherRuntime";
 import { createLaunchStatsService } from "../services/createLaunchStatsService";
+import { createHomeAssistantService } from "../services/homeAssistant/createHomeAssistantService";
 import { describeApp } from "../shared/apps/appPresentation";
 import type { Translations } from "../shared/i18n/createTranslations";
 import { TranslationContext } from "../shared/i18n/useTranslation";
@@ -35,11 +36,39 @@ export const mountHome = (
   const unsubscribeShell = settings.subscribe(syncShell);
   const inventory = createHomeInventory(runtime, settings, flushSync);
   const rows = createRef<HTMLElement>();
+  // XMLHttpRequest also reads the packaged ha.json and drawer.json, which fetch() cannot load from file:// on the TV.
+  const fetchJson = (url: string) =>
+    new Promise<unknown>((resolve, reject) => {
+      const request = new XMLHttpRequest();
+      request.open("GET", url);
+      request.timeout = 8000;
+      request.onload = () => {
+        if ((request.status === 0 || (request.status >= 200 && request.status < 300)) && request.responseText) {
+          try {
+            resolve(JSON.parse(request.responseText));
+          } catch {
+            reject(new Error("invalid JSON"));
+          }
+        } else {
+          reject(new Error("HTTP " + request.status));
+        }
+      };
+      request.onerror = () => reject(new Error("network"));
+      request.ontimeout = () => reject(new Error("timeout"));
+      request.send();
+    });
+  const homeAssistant = createHomeAssistantService({
+    fetchJson,
+    createSocket: (url) => new WebSocket(url),
+    setTimer: (callback, ms) => window.setTimeout(callback, ms),
+    clearTimer: (handle) => window.clearTimeout(handle),
+  });
   const environment = createHomeController(
     {
       runtime,
       settings,
       inventory,
+      homeAssistant,
       launches: createLaunchStatsService({
         getItem: (key) => localStorage.getItem(key),
         setItem: (key, value) => localStorage.setItem(key, value),
@@ -67,6 +96,7 @@ export const mountHome = (
     environment.bridge.blur();
     render(null, mount);
     inventory.dispose();
+    homeAssistant.dispose();
     unsubscribeShell();
     document.body.classList.remove("glass-ui");
     document.documentElement.removeAttribute("data-performance-mode");
@@ -80,6 +110,7 @@ export const mountHome = (
       </TranslationContext.Provider>,
       mount,
     );
+    void homeAssistant.start();
     return { bridge, dispose };
   } catch (error) {
     dispose();

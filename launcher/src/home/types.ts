@@ -6,6 +6,7 @@ import type { StatusStores } from "../contracts/status";
 import type { LauncherUpdateNotice } from "../contracts/updates";
 import type { LauncherRuntime } from "../platform/tizen/launcherRuntime";
 import type { LaunchStats } from "../services/createLaunchStatsService";
+import type { HomeAssistantService } from "../services/homeAssistant/createHomeAssistantService";
 import type { MessageKey } from "../shared/i18n/catalogues";
 import type { MutableStore, Store } from "../shared/state/createStore";
 export interface Inventory {
@@ -42,6 +43,7 @@ export interface HomeEnvironment {
   continueViewport: RefObject<HTMLDivElement>;
   describe(app: InstalledApp): AppPresentation;
   dismiss(): void;
+  homeAssistant: HomeAssistantService;
   inventory: Store<Inventory>;
   launches: LaunchStats;
   menuChoices(): readonly HomeMenuChoice[];
