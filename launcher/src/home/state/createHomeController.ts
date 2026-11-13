@@ -3,12 +3,11 @@ import { createInputScope } from "../../shared/input/createInputScope";
 import { focusControl } from "../../shared/navigation/focusControl";
 import { createStore } from "../../shared/state/createStore";
 import { ADD_APPS_KEY } from "../homeControls";
-import { QUICK_BUTTONS, quickButtonKey } from "../quickButtons";
 import type { HomeEnvironment, HomeMenuChoice, HomeState, Page } from "../types";
 
 import { revealHorizontalItem } from "./horizontalScroll";
 
-const HEADER_KEYS = ["gear", "samsung-home-shortcut", ...QUICK_BUTTONS.map(quickButtonKey), "home-tab", "apps-tab"];
+const HEADER_KEYS = ["gear", "samsung-home-shortcut", "home-tab", "apps-tab"] as const;
 const TOP_APP_COUNT = 3;
 // Reserve 16px for the focus outline beyond the 112px top and 80px bottom fades.
 const TOP_SCROLL_CLEARANCE = 128;
@@ -141,6 +140,8 @@ export const createHomeController = (
   let timer: number | undefined;
   let enterDown = false;
   let started = false;
+  // Fork addition: where focus returns when Left leaves the Home Assistant drawer.
+  let lastMainKey = "";
   const cancelPress = () => {
     if (timer !== undefined) {
       window.clearTimeout(timer);
@@ -185,6 +186,10 @@ export const createHomeController = (
     env.launches.record(id);
     runtime.apps.launch(app);
   };
+  const drawerKeys = () =>
+    state.getSnapshot().page === "home"
+      ? env.homeAssistant.getSnapshot().drawer.buttons.map((_, index) => "drawer:" + index)
+      : [];
   const ids = () =>
     state.getSnapshot().page === "home" ? homeIds() : inventory.getSnapshot().apps.map((app) => app.id);
   const scrollApps = () => state.getSnapshot().page === "home" && settings.getSnapshot().homeAppLayout === "scroll";
@@ -237,8 +242,17 @@ export const createHomeController = (
       update({ menu: null });
       cancelPress();
     }
-    const list = rows();
     const old = state.getSnapshot().selected;
+    if (drawerKeys().includes(old)) {
+      // The drawer sits outside the scrolling rows: focus it without moving the page.
+      update({ active: true });
+      const drawerNode = nodes.get(old);
+      if (drawerNode && inputScope.getPath().length === 1 && !runtime.settingsUi?.isOpen()) {
+        focusControl(drawerNode);
+      }
+      return;
+    }
+    const list = rows();
     const selected = getSelectedKey(list, old, started);
     if (list[1]?.length) {
       started = true;
@@ -347,14 +361,10 @@ export const createHomeController = (
       }
     } else if (key.startsWith("top:")) {
       launchApp(key.slice(4));
-    } else if (key.startsWith("quick:")) {
-      const button = QUICK_BUTTONS.find((item) => quickButtonKey(item) === key);
-      if (button?.action.type === "app") {
-        launchApp(button.action.appId);
-      } else if (button) {
-        runtime.toast(
-          runtime.translate("home.quickNotSet", { name: button.name || runtime.translate("home.quickEmpty") }),
-        );
+    } else if (key.startsWith("drawer:")) {
+      const button = env.homeAssistant.getSnapshot().drawer.buttons[Number(key.slice(7))];
+      if (button) {
+        env.homeAssistant.press(button);
       }
     } else if (key.startsWith("continue:")) {
       // Use the current service record; stale cards must not launch.
@@ -454,8 +464,24 @@ export const createHomeController = (
         }
         return;
       }
+      const drawer = drawerKeys();
+      const drawerIndex = drawer.indexOf(current.selected);
+      if (drawerIndex >= 0) {
+        if (code === K.UP || code === K.DOWN) {
+          select(drawer[Math.max(0, Math.min(drawer.length - 1, drawerIndex + delta))]);
+        } else if ((code === K.LEFT && !rtl) || (code === K.RIGHT && rtl)) {
+          select(lastMainKey || rows()[1]?.[0] || "home-tab");
+        }
+        return;
+      }
       const all = rows();
       const row = all.findIndex((items) => items.includes(current.selected));
+      const towardDrawer = (code === K.RIGHT && !rtl) || (code === K.LEFT && rtl);
+      if (towardDrawer && drawer.length && row >= 0 && all[row].indexOf(current.selected) === all[row].length - 1) {
+        lastMainKey = current.selected;
+        select(drawer[0]);
+        return;
+      }
       if (row < 0) {
         focus();
         return;
