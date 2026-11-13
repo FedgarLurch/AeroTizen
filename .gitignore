@@ -26,3 +26,6 @@ tests/native-untethered/bin/
 tests/native-untethered/obj/
 tests/native-boot-probe/bin/
 tests/native-boot-probe/obj/
+
+# Fork: Home Assistant connection added at install time; never commit it.
+launcher/ha.json
