@@ -7,7 +7,7 @@ export const DEFAULT_SETTINGS: SettingsDefaults = {
   theme: "classic",
   performanceMode: false,
   homeCardColumns: 3,
-  homeAppLayout: "grid",
+  homeAppLayout: "scroll",
   background: "aurora",
   customColour: DEFAULT_CUSTOM_COLOUR,
   customGradient: DEFAULT_CUSTOM_GRADIENT,
