@@ -46,7 +46,12 @@ from tempfile import TemporaryDirectory
 
 from aerotizen import __version__, catalog, diagnostics, discover, remote
 from aerotizen.device import DeviceSession
+from aerotizen.sdb import PORT as SDB_PORT
 from aerotizen.sdb import SdbError
+
+# Fork addition: SDB port for the TV session. Vetro's "Developer access" relay listens on 26201
+# while Developer Mode Host PC IP stays 127.0.0.1; pass --sdb-port 26201 to install through it.
+sdb_port = SDB_PORT
 
 STATE_DIR = remote.CONFIG_DIR
 
@@ -86,6 +91,9 @@ def packages(applist_text):
 
 def require_sdb(host):
     try:
+        if sdb_port != SDB_PORT:
+            # A relay is a plain SDB endpoint: skip the root-bridge selection tied to port 26101.
+            return DeviceSession(host, port=sdb_port, direct=True).connect()
         return DeviceSession(host).connect()
     except SdbError as e:
         d = remote.info(host)
@@ -708,6 +716,12 @@ def main():
         prog="aerotizen", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("--tv", help="TV IP address")
+    parser.add_argument(
+        "--sdb-port",
+        type=int,
+        default=SDB_PORT,
+        help="SDB port (default 26101; use 26201 for Vetro's Developer access relay)",
+    )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = parser.add_subparsers(dest="cmd", required=True)
     sub.add_parser("discover").set_defaults(fn=cmd_discover)
@@ -822,6 +836,10 @@ def main():
             )
         command.set_defaults(fn=cmd_root)
     args = parser.parse_args()
+    if not 1 <= args.sdb_port <= 65535:
+        sys.exit("--sdb-port must be between 1 and 65535.")
+    global sdb_port
+    sdb_port = args.sdb_port
     diagnostics.run_logged(args, args.fn, STATE_DIR)
 
 
