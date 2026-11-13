@@ -1,0 +1,43 @@
+.button {
+  box-sizing: border-box;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 22px;
+  height: 104px;
+  padding: 0 28px;
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  transition:
+    transform var(--motion-duration-focus) ease-out,
+    background var(--motion-duration-focus) ease-out;
+
+  &[data-focused="true"] {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 0 4px #fff;
+    transform: scale(1.02);
+  }
+}
+
+.icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  stroke-width: 1.8;
+}
+
+.name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 32px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.detail {
+  flex: 0 0 auto;
+  font-size: 22px;
+  color: #cfd6e3;
+}
