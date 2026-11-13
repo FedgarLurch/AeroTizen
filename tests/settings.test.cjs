@@ -36,22 +36,23 @@ test("defaults apply when nothing is saved", () => {
   assert.equal(settings.getSnapshot().showTime, true);
   assert.equal(settings.getSnapshot().showNetwork, true);
   assert.equal(settings.getSnapshot().homeCardColumns, 3);
-  assert.equal(settings.getSnapshot().homeAppLayout, "grid");
+  // Fork: Home defaults to the compact scrolling app strip.
+  assert.equal(settings.getSnapshot().homeAppLayout, "scroll");
 });
 
 test("Home layout persists independently of app size and rejects unknown layout values", () => {
   const key = "aerotizen.settings.v1";
   const { settings, store } = loadSettings({ [key]: JSON.stringify({ homeCardColumns: 4 }) });
-  assert.equal(settings.getSnapshot().homeAppLayout, "grid");
-  settings.update({ homeAppLayout: "scroll" });
+  assert.equal(settings.getSnapshot().homeAppLayout, "scroll");
+  settings.update({ homeAppLayout: "grid" });
 
   const restarted = loadSettings(store).settings;
-  assert.equal(restarted.getSnapshot().homeAppLayout, "scroll");
+  assert.equal(restarted.getSnapshot().homeAppLayout, "grid");
   assert.equal(restarted.getSnapshot().homeCardColumns, 4);
   for (const value of [null, true, "carousel", "rectangle"]) {
     assert.equal(
       loadSettings({ [key]: JSON.stringify({ homeAppLayout: value }) }).settings.getSnapshot().homeAppLayout,
-      "grid",
+      "scroll",
     );
   }
 });
