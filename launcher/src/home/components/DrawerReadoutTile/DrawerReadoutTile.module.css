@@ -1,0 +1,35 @@
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 18px 14px;
+  border-radius: 22px;
+  background: rgba(10, 14, 26, 0.45);
+}
+
+.name {
+  font-size: 20px;
+  color: #cfd6e3;
+}
+
+.value {
+  font-size: 38px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  [data-long="true"] > & {
+    font-size: 22px;
+    line-height: 46px;
+  }
+
+  [data-tone="good"] > & {
+    color: #8fe3b0;
+  }
+
+  [data-tone="alert"] > & {
+    color: #ffb27a;
+  }
+}
