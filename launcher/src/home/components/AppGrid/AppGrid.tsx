@@ -43,6 +43,7 @@ export const AppGrid = ({
         "data-page": page,
         "data-expanded": settings.clockLayout === "custom" ? "true" : "false",
         "data-scroll": scroll ? "true" : "false",
+        "data-strip": scroll ? "true" : "false",
       }}
       trackRef={page === "home" ? env.appItems : undefined}
       viewportRef={page === "home" ? env.appViewport : undefined}

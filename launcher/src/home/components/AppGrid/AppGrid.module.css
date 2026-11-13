@@ -43,4 +43,11 @@
       --app-card-large: 312px;
     }
   }
+
+  /* Fork addition: Home's scrolling row is a compact app strip above Top apps. */
+  &[data-strip="true"] {
+    --app-card-size: 200px;
+
+    gap: 24px;
+  }
 }
