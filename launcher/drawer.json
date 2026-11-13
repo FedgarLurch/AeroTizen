@@ -1,0 +1,45 @@
+{
+  "title": "Living Room",
+  "readouts": [
+    { "name": "Inside", "entity": "climate.living_room", "attribute": "current_temperature", "suffix": "°" },
+    { "name": "Front door", "entity": "lock.front_door" },
+    { "name": "Back door", "entity": "lock.back_door" }
+  ],
+  "buttons": [
+    {
+      "name": "Evening",
+      "icon": "moon",
+      "detail": "Scene",
+      "action": "scene.turn_on",
+      "target": { "entity_id": "scene.evening" }
+    },
+    {
+      "name": "Late night",
+      "icon": "lamp",
+      "detail": "Scene",
+      "action": "scene.turn_on",
+      "target": { "entity_id": "scene.late_night" }
+    },
+    {
+      "name": "Living room lights",
+      "icon": "lightbulb",
+      "entity": "light.living_room",
+      "action": "light.toggle",
+      "target": { "entity_id": "light.living_room" }
+    },
+    {
+      "name": "Shades",
+      "icon": "blinds",
+      "entity": "cover.window_1_shade_cover",
+      "action": "cover.toggle",
+      "target": { "entity_id": ["cover.window_1_shade_cover", "cover.window_2_shade_cover"] }
+    },
+    {
+      "name": "Ceiling fan",
+      "icon": "fan",
+      "entity": "fan.ceiling_fan",
+      "action": "fan.toggle",
+      "target": { "entity_id": "fan.ceiling_fan" }
+    }
+  ]
+}
