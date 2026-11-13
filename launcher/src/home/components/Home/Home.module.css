@@ -11,6 +11,12 @@
   &[data-expanded="true"] {
     --home-content-padding: 24px;
   }
+
+  /* Fork addition: Home's rows end before the Home Assistant drawer on the right. */
+  &[data-drawer="true"] {
+    position: relative;
+    --home-drawer-space: 600px;
+  }
 }
 
 .viewport {
@@ -65,7 +71,8 @@
 }
 
 .rows {
-  padding: var(--home-content-padding) var(--home-side-padding) 0;
+  padding: var(--home-content-padding) calc(var(--home-side-padding) + var(--home-drawer-space, 0px)) 0
+    var(--home-side-padding);
   will-change: transform;
   transform: translate3d(0, var(--home-offset), 0);
   transition: transform var(--motion-duration-viewport) cubic-bezier(0.2, 0.72, 0.25, 1);

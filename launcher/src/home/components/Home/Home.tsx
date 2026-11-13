@@ -9,6 +9,7 @@ import { AppActionsMenu } from "../AppActionsMenu/AppActionsMenu";
 import { AppGrid } from "../AppGrid/AppGrid";
 import { ContinueWatchingRow } from "../ContinueWatchingRow/ContinueWatchingRow";
 import { HomeControl } from "../HomeControl/HomeControl";
+import { HomeDrawer } from "../HomeDrawer/HomeDrawer";
 import { HomeHeader } from "../HomeHeader/HomeHeader";
 import { InputDock } from "../InputDock/InputDock";
 import { TopAppsRow } from "../TopAppsRow/TopAppsRow";
@@ -24,6 +25,8 @@ export const Home = ({ env }: { env: HomeEnvironment }) => {
   const draft = useStoreSelector(env.state, (state) => state.draft);
   const scroll = useStoreSelector(env.state, (state) => state.scroll);
   const { apps, inputs, items, ready } = useStore(env.inventory);
+  const { drawer } = useStore(env.homeAssistant);
+  const showDrawer = page === "home" && (drawer.buttons.length > 0 || drawer.readouts.length > 0);
   const home = draft || (settings.homeInitialized ? settings.home : [env.runtime.config.FIREPLACE_ID]);
   const visibleHome = home.filter(
     (id) => id === env.runtime.config.FIREPLACE_ID || !ready || apps.some((app) => app.id === id),
@@ -54,7 +57,12 @@ export const Home = ({ env }: { env: HomeEnvironment }) => {
     settings.aeroClockStyle,
   ]);
   return (
-    <div class={styles.home} data-home data-expanded={settings.clockLayout === "custom" ? "true" : "false"}>
+    <div
+      class={styles.home}
+      data-home
+      data-expanded={settings.clockLayout === "custom" ? "true" : "false"}
+      data-drawer={showDrawer ? "true" : "false"}
+    >
       <HomeHeader env={env} />
       <div
         class={styles.viewport}
@@ -121,6 +129,7 @@ export const Home = ({ env }: { env: HomeEnvironment }) => {
           </div>
         </div>
       </div>
+      <HomeDrawer env={env} visible={showDrawer} />
       <AppActionsMenu env={env} />
     </div>
   );
