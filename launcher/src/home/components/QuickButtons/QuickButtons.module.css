@@ -1,0 +1,30 @@
+.button {
+  &[data-empty="true"] {
+    opacity: 0.55;
+  }
+
+  &[data-focused="true"] {
+    opacity: 1;
+  }
+}
+
+/* The label appears under the focused button so icon-only slots stay identifiable. */
+.label {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+  font-size: 18px;
+  color: var(--header-icon-text, var(--fg));
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-duration-focus) ease-out;
+
+  [data-focused="true"] > & {
+    opacity: 1;
+  }
+}
