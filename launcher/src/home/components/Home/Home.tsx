@@ -11,6 +11,7 @@ import { ContinueWatchingRow } from "../ContinueWatchingRow/ContinueWatchingRow"
 import { HomeControl } from "../HomeControl/HomeControl";
 import { HomeHeader } from "../HomeHeader/HomeHeader";
 import { InputDock } from "../InputDock/InputDock";
+import { TopAppsRow } from "../TopAppsRow/TopAppsRow";
 
 import styles from "./Home.module.css";
 
@@ -88,6 +89,7 @@ export const Home = ({ env }: { env: HomeEnvironment }) => {
                   active={active}
                   label={t("home.homeApps")}
                 />
+                <TopAppsRow env={env} apps={apps} visible={page === "home"} active={active} />
                 <AppGrid
                   env={env}
                   ids={apps.map((app) => app.id)}
