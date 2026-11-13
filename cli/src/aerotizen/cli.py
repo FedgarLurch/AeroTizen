@@ -52,6 +52,8 @@ from aerotizen.sdb import SdbError
 # Fork addition: SDB port for the TV session. Vetro's "Developer access" relay listens on 26201
 # while Developer Mode Host PC IP stays 127.0.0.1; pass --sdb-port 26201 to install through it.
 sdb_port = SDB_PORT
+# Fork addition: seconds to wait for each SDB reply; relays and VPN links can need more than 15.
+sdb_timeout = 15
 
 STATE_DIR = remote.CONFIG_DIR
 
@@ -93,8 +95,8 @@ def require_sdb(host):
     try:
         if sdb_port != SDB_PORT:
             # A relay is a plain SDB endpoint: skip the root-bridge selection tied to port 26101.
-            return DeviceSession(host, port=sdb_port, direct=True).connect()
-        return DeviceSession(host).connect()
+            return DeviceSession(host, port=sdb_port, timeout=sdb_timeout, direct=True).connect()
+        return DeviceSession(host, timeout=sdb_timeout).connect()
     except SdbError as e:
         d = remote.info(host)
         sys.exit(
@@ -722,6 +724,12 @@ def main():
         default=SDB_PORT,
         help="SDB port (default 26101; use 26201 for Vetro's Developer access relay)",
     )
+    parser.add_argument(
+        "--sdb-timeout",
+        type=int,
+        default=15,
+        help="seconds to wait for each TV reply (default 15; raise it for relays or VPN links)",
+    )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = parser.add_subparsers(dest="cmd", required=True)
     sub.add_parser("discover").set_defaults(fn=cmd_discover)
@@ -838,8 +846,11 @@ def main():
     args = parser.parse_args()
     if not 1 <= args.sdb_port <= 65535:
         sys.exit("--sdb-port must be between 1 and 65535.")
-    global sdb_port
+    if not 1 <= args.sdb_timeout <= 600:
+        sys.exit("--sdb-timeout must be between 1 and 600.")
+    global sdb_port, sdb_timeout
     sdb_port = args.sdb_port
+    sdb_timeout = args.sdb_timeout
     diagnostics.run_logged(args, args.fn, STATE_DIR)
 
 
