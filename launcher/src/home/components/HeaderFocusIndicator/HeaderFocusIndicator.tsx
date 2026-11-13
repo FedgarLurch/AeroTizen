@@ -2,14 +2,13 @@ import { useLayoutEffect, useRef, useState } from "preact/hooks";
 
 import { useStoreSelector } from "../../../shared/hooks/useStore";
 import { useTranslation } from "../../../shared/i18n/useTranslation";
-import { QUICK_BUTTONS, quickButtonKey } from "../../quickButtons";
 import type { HomeEnvironment } from "../../types";
 
 import styles from "./HeaderFocusIndicator.module.css";
 
 const GROUP_KEYS: Record<"tabs" | "shortcuts", readonly string[]> = {
   tabs: ["home-tab", "apps-tab"],
-  shortcuts: ["gear", "samsung-home-shortcut", ...QUICK_BUTTONS.map(quickButtonKey)],
+  shortcuts: ["gear", "samsung-home-shortcut"],
 };
 
 export const HeaderFocusIndicator = ({
