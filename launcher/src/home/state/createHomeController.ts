@@ -1,12 +1,15 @@
+import { selectTopApps } from "../../services/createLaunchStatsService";
 import { createInputScope } from "../../shared/input/createInputScope";
 import { focusControl } from "../../shared/navigation/focusControl";
 import { createStore } from "../../shared/state/createStore";
 import { ADD_APPS_KEY } from "../homeControls";
+import { QUICK_BUTTONS, quickButtonKey } from "../quickButtons";
 import type { HomeEnvironment, HomeMenuChoice, HomeState, Page } from "../types";
 
 import { revealHorizontalItem } from "./horizontalScroll";
 
-const HEADER_KEYS = ["gear", "samsung-home-shortcut", "home-tab", "apps-tab"] as const;
+const HEADER_KEYS = ["gear", "samsung-home-shortcut", ...QUICK_BUTTONS.map(quickButtonKey), "home-tab", "apps-tab"];
+const TOP_APP_COUNT = 3;
 // Reserve 16px for the focus outline beyond the 112px top and 80px bottom fades.
 const TOP_SCROLL_CLEARANCE = 128;
 const BOTTOM_SCROLL_CLEARANCE = 96;
@@ -118,7 +121,7 @@ const getVerticalColumn = ({
 export const createHomeController = (
   env: Omit<
     HomeEnvironment,
-    "bridge" | "state" | "select" | "activate" | "showPage" | "choose" | "dismiss" | "menuChoices"
+    "bridge" | "state" | "select" | "activate" | "showPage" | "choose" | "dismiss" | "menuChoices" | "topApps"
   >,
   transaction: (action: () => void) => void,
 ) => {
@@ -161,6 +164,27 @@ export const createHomeController = (
       (id) => id === runtime.config.FIREPLACE_ID || !inventory.getSnapshot().ready || runtime.apps.byId(id),
     );
   };
+  const topApps = () => {
+    const { apps, ready } = inventory.getSnapshot();
+    if (!ready || !apps.length) {
+      return [];
+    }
+    const fallback = homeIds().filter((id) => id !== runtime.config.FIREPLACE_ID);
+    return selectTopApps(
+      env.launches.getSnapshot().counts,
+      apps.map((app) => app.id),
+      fallback,
+      TOP_APP_COUNT,
+    );
+  };
+  const launchApp = (id: string) => {
+    const app = runtime.apps.byId(id);
+    if (!app) {
+      return;
+    }
+    env.launches.record(id);
+    runtime.apps.launch(app);
+  };
   const ids = () =>
     state.getSnapshot().page === "home" ? homeIds() : inventory.getSnapshot().apps.map((app) => app.id);
   const scrollApps = () => state.getSnapshot().page === "home" && settings.getSnapshot().homeAppLayout === "scroll";
@@ -191,10 +215,12 @@ export const createHomeController = (
       return appKeys.length ? [...appLayout, ["back-to-top"]] : appLayout;
     }
     const { items, inputs } = inventory.getSnapshot();
+    const top = topApps();
+    const topRows = top.length ? [top.map((id) => "top:" + id)] : [];
     const continueRows =
       settings.getSnapshot().continueWatching && items.length ? [items.map((item) => "continue:" + item.key)] : [];
     const inputRows = inputs.length ? [inputs.map(sourceKey)] : [];
-    return [...appLayout, ...continueRows, ...inputRows];
+    return [...appLayout, ...topRows, ...continueRows, ...inputRows];
   };
   const focus = () => {
     if (document.hidden || runtime.settingsUi?.isOpen()) {
@@ -314,11 +340,21 @@ export const createHomeController = (
       runtime.apps.openStore();
     } else if (key.startsWith("app:")) {
       const id = key.slice(4);
-      const app = runtime.apps.byId(id);
       if (id === runtime.config.FIREPLACE_ID) {
         runtime.apps.playFireplace();
-      } else if (app) {
-        runtime.apps.launch(app);
+      } else {
+        launchApp(id);
+      }
+    } else if (key.startsWith("top:")) {
+      launchApp(key.slice(4));
+    } else if (key.startsWith("quick:")) {
+      const button = QUICK_BUTTONS.find((item) => quickButtonKey(item) === key);
+      if (button?.action.type === "app") {
+        launchApp(button.action.appId);
+      } else if (button) {
+        runtime.toast(
+          runtime.translate("home.quickNotSet", { name: button.name || runtime.translate("home.quickEmpty") }),
+        );
       }
     } else if (key.startsWith("continue:")) {
       // Use the current service record; stale cards must not launch.
@@ -481,5 +517,5 @@ export const createHomeController = (
     keydown,
     keyup,
   };
-  return { ...env, state, bridge, select, activate, showPage, choose, dismiss, menuChoices };
+  return { ...env, state, bridge, select, activate, showPage, choose, dismiss, menuChoices, topApps };
 };
