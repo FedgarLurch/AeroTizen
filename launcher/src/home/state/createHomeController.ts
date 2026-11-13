@@ -3,11 +3,12 @@ import { createInputScope } from "../../shared/input/createInputScope";
 import { focusControl } from "../../shared/navigation/focusControl";
 import { createStore } from "../../shared/state/createStore";
 import { ADD_APPS_KEY } from "../homeControls";
+import { QUICK_BUTTONS, quickButtonKey } from "../quickButtons";
 import type { HomeEnvironment, HomeMenuChoice, HomeState, Page } from "../types";
 
 import { revealHorizontalItem } from "./horizontalScroll";
 
-const HEADER_KEYS = ["gear", "samsung-home-shortcut", "home-tab", "apps-tab"] as const;
+const HEADER_KEYS = ["gear", "samsung-home-shortcut", ...QUICK_BUTTONS.map(quickButtonKey), "home-tab", "apps-tab"];
 const TOP_APP_COUNT = 3;
 // Reserve 16px for the focus outline beyond the 112px top and 80px bottom fades.
 const TOP_SCROLL_CLEARANCE = 128;
@@ -361,6 +362,15 @@ export const createHomeController = (
       }
     } else if (key.startsWith("top:")) {
       launchApp(key.slice(4));
+    } else if (key.startsWith("quick:")) {
+      const button = QUICK_BUTTONS.find((item) => quickButtonKey(item) === key);
+      if (button?.action.type === "app") {
+        launchApp(button.action.appId);
+      } else if (button) {
+        runtime.toast(
+          runtime.translate("home.quickNotSet", { name: button.name || runtime.translate("home.quickEmpty") }),
+        );
+      }
     } else if (key.startsWith("drawer:")) {
       const button = env.homeAssistant.getSnapshot().drawer.buttons[Number(key.slice(7))];
       if (button) {
