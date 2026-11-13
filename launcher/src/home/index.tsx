@@ -5,6 +5,7 @@ import type { SettingsStore } from "../contracts/preferences";
 import type { StatusStores } from "../contracts/status";
 import type { LauncherUpdateNotice } from "../contracts/updates";
 import type { LauncherRuntime } from "../platform/tizen/launcherRuntime";
+import { createLaunchStatsService } from "../services/createLaunchStatsService";
 import { describeApp } from "../shared/apps/appPresentation";
 import type { Translations } from "../shared/i18n/createTranslations";
 import { TranslationContext } from "../shared/i18n/useTranslation";
@@ -39,6 +40,10 @@ export const mountHome = (
       runtime,
       settings,
       inventory,
+      launches: createLaunchStatsService({
+        getItem: (key) => localStorage.getItem(key),
+        setItem: (key, value) => localStorage.setItem(key, value),
+      }),
       status,
       updates,
       rows,

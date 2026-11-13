@@ -5,6 +5,7 @@ import type { SettingsSnapshot, SettingsStore } from "../contracts/preferences";
 import type { StatusStores } from "../contracts/status";
 import type { LauncherUpdateNotice } from "../contracts/updates";
 import type { LauncherRuntime } from "../platform/tizen/launcherRuntime";
+import type { LaunchStats } from "../services/createLaunchStatsService";
 import type { MessageKey } from "../shared/i18n/catalogues";
 import type { MutableStore, Store } from "../shared/state/createStore";
 export interface Inventory {
@@ -42,6 +43,7 @@ export interface HomeEnvironment {
   describe(app: InstalledApp): AppPresentation;
   dismiss(): void;
   inventory: Store<Inventory>;
+  launches: LaunchStats;
   menuChoices(): readonly HomeMenuChoice[];
   nodes: Map<string, HTMLElement>;
   rows: RefObject<HTMLElement>;
@@ -52,5 +54,6 @@ export interface HomeEnvironment {
   showPage(page: Page): void;
   state: MutableStore<HomeState>;
   status: StatusStores;
+  topApps(): readonly string[];
   updates: LauncherUpdateNotice;
 }
