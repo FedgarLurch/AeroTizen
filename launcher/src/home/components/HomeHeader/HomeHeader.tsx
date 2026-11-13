@@ -8,6 +8,7 @@ import { NetworkStatus } from "../../../status/NetworkStatus/NetworkStatus";
 import type { HomeEnvironment } from "../../types";
 import { HeaderFocusIndicator } from "../HeaderFocusIndicator/HeaderFocusIndicator";
 import { HomeControl } from "../HomeControl/HomeControl";
+import { QuickButtons } from "../QuickButtons/QuickButtons";
 
 import styles from "./HomeHeader.module.css";
 
@@ -47,6 +48,7 @@ export const HomeHeader = ({ env }: { env: HomeEnvironment }) => {
         >
           <Icon icon={House} />
         </HomeControl>
+        <QuickButtons env={env} className={styles.shortcut} />
         <NetworkStatus status={env.status} />
       </div>
       <nav class={styles.tabs} data-header-tabs aria-label={t("home.views")}>
