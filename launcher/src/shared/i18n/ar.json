@@ -11,6 +11,8 @@
   "home.backToTop": "العودة إلى الأعلى",
   "home.continueWatching": "متابعة المشاهدة",
   "home.topApps": "التطبيقات الأكثر استخدامًا",
+  "home.quickNotSet": "{{name}} غير مُعد بعد",
+  "home.quickEmpty": "خانة فارغة",
   "home.drawer": "Home Assistant",
   "home.drawerUnconfigured": "أضف رمز Home Assistant للاتصال",
   "home.drawerConnecting": "جارٍ الاتصال بـ Home Assistant…",

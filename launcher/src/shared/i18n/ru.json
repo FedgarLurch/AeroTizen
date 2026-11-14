@@ -11,6 +11,8 @@
   "home.backToTop": "К началу списка",
   "home.continueWatching": "Продолжить просмотр",
   "home.topApps": "Частые приложения",
+  "home.quickNotSet": "{{name}} ещё не настроено",
+  "home.quickEmpty": "Пустой слот",
   "home.drawer": "Home Assistant",
   "home.drawerUnconfigured": "Добавьте токен Home Assistant для подключения",
   "home.drawerConnecting": "Подключение к Home Assistant…",

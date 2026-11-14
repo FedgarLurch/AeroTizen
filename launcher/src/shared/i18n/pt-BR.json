@@ -11,6 +11,8 @@
   "home.backToTop": "Voltar ao topo",
   "home.continueWatching": "Continuar assistindo",
   "home.topApps": "Apps mais usados",
+  "home.quickNotSet": "{{name}} ainda não está configurado",
+  "home.quickEmpty": "Espaço vazio",
   "home.drawer": "Home Assistant",
   "home.drawerUnconfigured": "Adicione um token do Home Assistant para conectar",
   "home.drawerConnecting": "Conectando ao Home Assistant…",

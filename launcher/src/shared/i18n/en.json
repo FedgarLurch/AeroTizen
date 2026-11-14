@@ -11,6 +11,8 @@
   "home.backToTop": "Back to top",
   "home.continueWatching": "Continue Watching",
   "home.topApps": "Top apps",
+  "home.quickNotSet": "{{name}} isn't set up yet",
+  "home.quickEmpty": "Empty slot",
   "home.drawer": "Home Assistant",
   "home.drawerUnconfigured": "Add a Home Assistant token to connect",
   "home.drawerConnecting": "Connecting to Home Assistant…",
